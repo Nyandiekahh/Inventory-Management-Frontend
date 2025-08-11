@@ -3,9 +3,10 @@ import { Scan, X, ShoppingCart, CreditCard } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import Receipt from './Receipt';
 
 const SalesComponent = ({ requireAdminAuth }) => {
-  const { products, updateStock, addSale } = useStore();
+  const { products, updateStock, addSale, currentStore } = useStore();
   const { currentUser } = useAuth();
   const {
     cart,
@@ -22,6 +23,8 @@ const SalesComponent = ({ requireAdminAuth }) => {
 
   const [barcodeInput, setBarcodeInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [currentSale, setCurrentSale] = useState(null);
 
   const availableProducts = products.filter(p => p.stock > 0);
   const filteredProducts = availableProducts.filter(p =>
@@ -52,6 +55,17 @@ const SalesComponent = ({ requireAdminAuth }) => {
     if (!canCompleteTransation()) return;
 
     const total = getCartTotal();
+    const change = getChange();
+    
+    // Show immediate confirmation
+    const confirmed = window.confirm(
+      `Complete sale for KSh ${total.toFixed(2)}?\n` +
+      `Payment: KSh ${customerPayment}\n` +
+      `Change: KSh ${change.toFixed(2)}`
+    );
+    
+    if (!confirmed) return;
+
     const saleData = {
       items: cart.map(item => ({
         productId: item.id,
@@ -70,10 +84,23 @@ const SalesComponent = ({ requireAdminAuth }) => {
     }));
 
     updateStock(stockUpdates);
-    addSale(saleData);
+    const newSale = addSale(saleData);
+    
+    // Create sale object for receipt
+    const saleForReceipt = {
+      id: newSale?.id || Date.now(),
+      date: new Date().toISOString(),
+      time: new Date().toLocaleTimeString('en-GB', { hour12: false }).slice(0, 5),
+      ...saleData
+    };
+    
+    console.log('Sale completed:', saleForReceipt); // Debug log
+    setCurrentSale(saleForReceipt);
+    setShowReceipt(true);
     clearCart();
     
-    alert(`Sale completed successfully! Change: KSh ${getChange().toFixed(2)}`);
+    // Also show an alert as backup
+    alert(`✅ Sale completed!\nReceipt #${saleForReceipt.id}\nTotal: KSh ${total.toFixed(2)}\nChange: KSh ${change.toFixed(2)}`);
   };
 
   const CartItem = ({ item }) => (
@@ -134,6 +161,27 @@ const SalesComponent = ({ requireAdminAuth }) => {
             <div className="flex items-center gap-2 mb-4">
               <ShoppingCart className="w-5 h-5 text-blue-600" />
               <h3 className="font-semibold">Product Selection</h3>
+              {/* Temporary test button for debugging */}
+              <button
+                onClick={() => {
+                  const testSale = {
+                    id: 999,
+                    date: new Date().toISOString(),
+                    time: '14:30',
+                    items: [
+                      { name: 'Test Product', quantity: 1, price: 100 }
+                    ],
+                    total: 100,
+                    cashier: 'Test User'
+                  };
+                  console.log('Testing receipt with:', testSale);
+                  setCurrentSale(testSale);
+                  setShowReceipt(true);
+                }}
+                className="ml-auto bg-green-500 text-white px-2 py-1 rounded text-xs"
+              >
+                Test Receipt
+              </button>
             </div>
             
             {/* Barcode Scanner */}

@@ -122,6 +122,38 @@ export const PERMISSIONS = {
   MANAGE_USERS: 'manage_users'
 };
 
+// Super Admin Navigation - Manages multiple stores and subscriptions
+export const SUPER_ADMIN_NAVIGATION = [
+  { id: 'dashboard', label: 'System Overview', icon: 'BarChart3' },
+  { id: 'stores', label: 'Store Management', icon: 'Store' },
+  { id: 'analytics', label: 'Global Analytics', icon: 'TrendingUp' },
+  { id: 'subscriptions', label: 'Subscriptions', icon: 'CreditCard' },
+  { id: 'system-users', label: 'System Users', icon: 'Users' },
+  { id: 'settings', label: 'System Settings', icon: 'Settings' }
+];
+
+// Store Admin Navigation - Manages one store completely
+export const STORE_ADMIN_NAVIGATION = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'BarChart3' },
+  { id: 'products', label: 'Products', icon: 'Package' },
+  { id: 'sales', label: 'Sales/POS', icon: 'ShoppingCart' },
+  { id: 'purchase', label: 'Purchase Orders', icon: 'TrendingUp' },
+  { id: 'inventory', label: 'Inventory', icon: 'Building' },
+  { id: 'reports', label: 'Reports', icon: 'FileText' },
+  { id: 'users', label: 'Staff Management', icon: 'Users' },
+  { id: 'settings', label: 'Store Settings', icon: 'Settings' }
+];
+
+// Store User Navigation - Limited access for cashiers/staff
+export const STORE_USER_NAVIGATION = [
+  { id: 'dashboard', label: 'My Dashboard', icon: 'BarChart3' },
+  { id: 'sales', label: 'Point of Sale', icon: 'ShoppingCart' },
+  { id: 'products', label: 'View Products', icon: 'Package', readonly: true },
+  { id: 'my-sales', label: 'My Sales History', icon: 'FileText' },
+  { id: 'profile', label: 'My Profile', icon: 'User' }
+];
+
+// Legacy navigation for backward compatibility
 export const NAVIGATION_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'BarChart3' },
   { id: 'products', label: 'Products', icon: 'Package' },

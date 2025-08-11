@@ -26,8 +26,14 @@ export const AuthProvider = ({ children }) => {
       if (credentials.role === USER_ROLES.SUPER_ADMIN) {
         setCurrentUser(sampleData.superAdmin);
       } else {
-        // For demo, use first user
-        setCurrentUser(sampleData.users[0]);
+        // ✅ FIX: Find the correct user based on email
+        const foundUser = sampleData.users.find(user => user.email === credentials.email);
+        if (foundUser) {
+          setCurrentUser(foundUser);
+        } else {
+          // Fallback to first user if email not found
+          setCurrentUser(sampleData.users[0]);
+        }
       }
       setIsLoggedIn(true);
       return true;
@@ -49,6 +55,10 @@ export const AuthProvider = ({ children }) => {
     return currentUser?.name === 'System Administrator';
   };
 
+  const isStoreUser = () => {
+    return currentUser?.role === 'Cashier' || (currentUser?.role !== 'Admin' && currentUser?.name !== 'System Administrator');
+  };
+
   const hasPermission = (permission) => {
     if (isAdmin()) return true;
     return currentUser?.permissions?.includes(permission) || false;
@@ -63,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAdmin,
     isSuperAdmin,
+    isStoreUser,
     hasPermission
   };
 
