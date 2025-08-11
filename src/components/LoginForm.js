@@ -1,13 +1,33 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { USER_ROLES } from '../utils/constants';
 
 const LoginForm = () => {
-  const { loginForm, setLoginForm, login } = useAuth();
+  const { loginForm, setLoginForm, login, isSuperAdmin, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogin = () => {
-    login(loginForm);
+  const handleLogin = async () => {
+    const success = await login(loginForm);
+    if (success) {
+      // Get the intended destination or redirect to appropriate dashboard
+      const from = location.state?.from?.pathname;
+      
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        // Redirect to appropriate dashboard based on role
+        if (isSuperAdmin()) {
+          navigate('/admin/dashboard', { replace: true });
+        } else if (isAdmin()) {
+          navigate('/store/dashboard', { replace: true });
+        } else {
+          navigate('/pos/dashboard', { replace: true });
+        }
+      }
+    }
   };
 
   const handleInputChange = (field, value) => {

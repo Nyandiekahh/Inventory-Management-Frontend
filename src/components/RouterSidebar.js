@@ -1,33 +1,21 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Store, BarChart3, Package, ShoppingCart, TrendingUp, 
   Users, Settings, FileText, CreditCard, User, Building
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
-import { 
-  SUPER_ADMIN_NAVIGATION, 
-  STORE_ADMIN_NAVIGATION, 
-  STORE_USER_NAVIGATION
-} from '../utils/constants';
 
-const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
+const RouterSidebar = ({ sidebarOpen }) => {
   const { currentUser, isSuperAdmin, isAdmin } = useAuth();
   const { currentStore } = useStore();
+  const location = useLocation();
 
   const getIcon = (iconName) => {
     const icons = {
-      BarChart3,
-      Package,
-      ShoppingCart,
-      TrendingUp,
-      Users,
-      Store,
-      Settings,
-      FileText,
-      Building,
-      CreditCard,
-      User
+      BarChart3, Package, ShoppingCart, TrendingUp, Users, Store,
+      Settings, FileText, Building, CreditCard, User
     };
     return icons[iconName] || BarChart3;
   };
@@ -35,11 +23,33 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
   // Get navigation items based on user role
   const getNavigationItems = () => {
     if (isSuperAdmin()) {
-      return SUPER_ADMIN_NAVIGATION;
+      return [
+        { path: '/admin/dashboard', label: 'System Overview', icon: 'BarChart3' },
+        { path: '/admin/stores', label: 'Store Management', icon: 'Store' },
+        { path: '/admin/analytics', label: 'Global Analytics', icon: 'TrendingUp' },
+        { path: '/admin/subscriptions', label: 'Subscriptions', icon: 'CreditCard' },
+        { path: '/admin/users', label: 'System Users', icon: 'Users' },
+        { path: '/admin/settings', label: 'System Settings', icon: 'Settings' }
+      ];
     } else if (isAdmin()) {
-      return STORE_ADMIN_NAVIGATION;
+      return [
+        { path: '/store/dashboard', label: 'Dashboard', icon: 'BarChart3' },
+        { path: '/store/products', label: 'Products', icon: 'Package' },
+        { path: '/store/sales', label: 'Sales/POS', icon: 'ShoppingCart' },
+        { path: '/store/purchase-orders', label: 'Purchase Orders', icon: 'TrendingUp' },
+        { path: '/store/inventory', label: 'Inventory', icon: 'Building' },
+        { path: '/store/reports', label: 'Reports', icon: 'FileText' },
+        { path: '/store/users', label: 'Staff Management', icon: 'Users' },
+        { path: '/store/settings', label: 'Store Settings', icon: 'Settings' }
+      ];
     } else {
-      return STORE_USER_NAVIGATION;
+      return [
+        { path: '/pos/dashboard', label: 'My Dashboard', icon: 'BarChart3' },
+        { path: '/pos/sales', label: 'Point of Sale', icon: 'ShoppingCart' },
+        { path: '/pos/products', label: 'View Products', icon: 'Package', readonly: true },
+        { path: '/pos/my-sales', label: 'My Sales History', icon: 'FileText' },
+        { path: '/pos/profile', label: 'My Profile', icon: 'User' }
+      ];
     }
   };
 
@@ -57,6 +67,11 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
     if (isSuperAdmin()) return 'Multi-Store Management';
     if (currentStore) return currentStore.name;
     return 'Point of Sale';
+  };
+
+  // Check if current path is active
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -84,22 +99,22 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
         <div className="space-y-2">
           {navigationItems.map(item => {
             const Icon = getIcon(item.icon);
-            const isActive = activeTab === item.id;
+            const active = isActive(item.path);
             const isReadonly = item.readonly && !isAdmin();
             
             return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                disabled={isReadonly}
+              <Link
+                key={item.path}
+                to={item.path}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  isActive 
+                  active 
                     ? 'bg-blue-100 text-blue-700 shadow-sm' 
                     : isReadonly
                     ? 'text-gray-400 cursor-not-allowed'
                     : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
                 }`}
                 title={!sidebarOpen ? item.label : ''}
+                onClick={isReadonly ? (e) => e.preventDefault() : undefined}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {sidebarOpen && (
@@ -112,7 +127,7 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
                     )}
                   </div>
                 )}
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -142,4 +157,4 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen }) => {
   );
 };
 
-export default Sidebar;
+export default RouterSidebar;
